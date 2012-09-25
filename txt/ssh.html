@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+</head>
+<body>
+<h1 id="manual-setup-ssh">Manual Setup SSH</h1>
+<blockquote>
+<p>by: ben@srctxt.org (c) 2011 2012<br /> rev: v.1.1, 2012-09-25<br /> lic: Creative Commons License<br /> tags: manuals, setups, ssh</p>
+</blockquote>
+<h2 id="contents">Contents:</h2>
+<ul>
+<li><p><a href="#intro">intro</a></p></li>
+<li><a href="#setup">Setup</a>
+<ul>
+<li><a href="#setup-keys">Setup Keys</a></li>
+<li><a href="#setup-server">Setup Server</a></li>
+</ul></li>
+<li><p><a href="#configure-connection">Configure Connection</a></p></li>
+<li><a href="#usage">Usage</a>
+<ul>
+<li><a href="#changing-password">Changing Password</a></li>
+</ul></li>
+<li><p><a href="#installation">Installation</a></p></li>
+</ul>
+<h2 id="intro">Intro</h2>
+<p>This manual is about ssh a tool based on public key method in order to securely connect to remote machines</p>
+<h2 id="setup">Setup</h2>
+<h3 id="setup-keys">Setup Keys</h3>
+<p>Setup id files on local machine</p>
+<pre><code>mkdir ~/.ssh
+chmod 0700 ~/.ssh      # rwx only for owner
+cd ~/.ssh
+ssh-keygen -t rsa -b 2048 -f mykey -C ben@lekin.org
+chmod 0600 ~/.ssh/*    # rw only for owner</code></pre>
+<p>That results in two key files (identity files):</p>
+<ul>
+<li>mykey</li>
+<li>mykey.pub</li>
+</ul>
+<h3 id="setup-server">Setup Server</h3>
+<p>Setup id files on remote machine</p>
+<pre><code>scp mykey.pub pn@by.joyent.us:~/
+ssh user@by.joyent.us
+
+cat ~/mykey.pub &gt;&gt; ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+rm -rf ~/mykey.pub</code></pre>
+<h2 id="configure-connection">Configure Connection</h2>
+<h3 id="manual-connection">Manual Connection</h3>
+<p>With an ID file</p>
+<pre><code>ssh -i $HOME/.ssh/mykey pn@by.joyent.us</code></pre>
+<p>Or without a password:</p>
+<pre><code>ssh -i ~/.ssh/mykey -o &quot;PasswordAuthentication no&quot; -p 22 pn@by.joyent.us</code></pre>
+<p>Or put in a config file under ~/.ssh/config</p>
+<table>
+<col width="66%" />
+<tbody>
+<tr class="odd">
+<td align="center">Host joyent HostName by.joyent.us IdentityFile ~/.ssh/mykey # PasswordAuthentication no Port 22 User pn</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage">Usage</h2>
+<h3 id="choose-password">Choose password</h3>
+<p>Although is possible to use passwordless id files, Per default you should define a password. A secure ssh password:</p>
+<ul>
+<li>a sentence with multiple words and spaces</li>
+<li>misspelling of words</li>
+<li>replace chars with numbers</li>
+<li>use punctuation like ',' of '.'</li>
+</ul>
+<h3 id="changing-password">Changing password</h3>
+<p>You can change the pass-phrase at any time by using the -p option of ssh-keygen.</p>
+<pre><code>% ssh-keygen -p
+Enter file in which the key is (/homes/ben/.ssh/id_rsa): [RETURN]
+Enter old passphrase: 1amp jumb3d
+Key has comment &#39;/u/kim/.ssh/id_rsa&#39;
+Enter new passphrase (empty for no passphrase): cow 3ats grass
+Enter same passphrase again: cow 3ats grass
+Your identification has been saved with the new passphrase.</code></pre>
+<p>The pass-phrases are not echoed as you type them.</p>
+<h2 id="installation-of-ssh-server-and-client">Installation of ssh (server and client)</h2>
+<p>On Ubuntu/Debian</p>
+<pre><code>sudo apt-get install openssh-server openssh-client</code></pre>
+<p>SSHD Configuration</p>
+<p>The server should now be ready by default. Just test it from your home computer or from same system with the command:</p>
+<p>test it: ssh localhost</p>
+<p>OR ssh user@your-server-ip-address</p>
+<p>To stop ssh server, enter:</p>
+<pre><code>sudo /etc/init.d/ssh stop</code></pre>
+<p>To start sshs server, enter:</p>
+<pre><code>sudo /etc/init.d/ssh start</code></pre>
+<p>To restart ssh server, enter:</p>
+<pre><code>sudo /etc/init.d/ssh restart</code></pre>
+</body>
+</html>

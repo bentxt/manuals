@@ -1,0 +1,141 @@
+# Manual Setup SSH
+
+>  by: ben@srctxt.org (c) 2011 2012  
+>  rev: v.1.1, 2012-09-25  
+>  lic: Creative Commons License  
+>  tags: manuals, setups, ssh  
+
+Contents:
+---------
+
+* [intro](#intro)
+
+* [Setup](#setup)
+    + [Setup Keys](#setup-keys)
+    + [Setup Server](#setup-server)
+
+* [Configure Connection](#configure-connection)
+
+* [Usage](#usage)
+    + [Changing Password](#changing-password)
+
+* [Installation](#installation)
+
+
+
+Intro
+-----
+This manual is about ssh a tool based on public key method in order to securely connect to remote machines
+
+
+Setup 
+-----
+
+### Setup Keys
+
+Setup id files on local machine
+
+	mkdir ~/.ssh
+	chmod 0700 ~/.ssh      # rwx only for owner
+	cd ~/.ssh
+	ssh-keygen -t rsa -b 2048 -f mykey -C ben@lekin.org
+	chmod 0600 ~/.ssh/*    # rw only for owner
+
+That results in two key files (identity files):
+
+- mykey
+- mykey.pub
+
+### Setup Server
+
+Setup id files on remote machine
+
+	scp mykey.pub pn@by.joyent.us:~/
+	ssh user@by.joyent.us
+
+	cat ~/mykey.pub >> ~/.ssh/authorized_keys
+	chmod 0600 ~/.ssh/authorized_keys
+	rm -rf ~/mykey.pub
+
+## Configure Connection
+
+### Manual Connection
+
+With an ID file 
+
+	ssh -i $HOME/.ssh/mykey pn@by.joyent.us
+
+Or without a password:
+
+	ssh -i ~/.ssh/mykey -o "PasswordAuthentication no" -p 22 pn@by.joyent.us
+
+Or put in a config file under ~/.ssh/config
+
+------------------------------------------------
+	Host joyent
+		HostName by.joyent.us
+		IdentityFile ~/.ssh/mykey
+		# PasswordAuthentication no
+		Port 22
+		User pn 
+		
+------------------------------------------------
+
+
+Usage
+-----
+
+### Choose password
+
+Although is possible to use passwordless id files, Per default you should define a password. A secure ssh password:
+
+- a sentence with multiple words and spaces
+- misspelling of words
+- replace chars with numbers
+- use punctuation like ',' of '.'
+
+### Changing password
+
+You can change the pass-phrase at any time by using the -p option of ssh-keygen.
+
+	% ssh-keygen -p
+	Enter file in which the key is (/homes/ben/.ssh/id_rsa): [RETURN]
+	Enter old passphrase: 1amp jumb3d
+	Key has comment '/u/kim/.ssh/id_rsa'
+	Enter new passphrase (empty for no passphrase): cow 3ats grass
+	Enter same passphrase again: cow 3ats grass
+	Your identification has been saved with the new passphrase.
+
+The pass-phrases are not echoed as you type them.
+
+
+## Installation of ssh (server and client)
+
+On Ubuntu/Debian
+
+	sudo apt-get install openssh-server openssh-client
+	
+SSHD Configuration
+
+The server should now be ready by default. Just test it from your home computer or from same system with the command:
+
+test it:
+    ssh localhost
+
+OR
+    ssh user@your-server-ip-address
+
+To stop ssh server, enter:
+
+    sudo /etc/init.d/ssh stop
+
+To start sshs server, enter:
+
+    sudo /etc/init.d/ssh start
+
+To restart ssh server, enter:
+
+    sudo /etc/init.d/ssh restart
+
+
+
